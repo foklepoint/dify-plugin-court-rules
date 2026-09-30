@@ -1,0 +1,63 @@
+identity:
+  name: list_court_holidays
+  author: foklepoint
+  label:
+    en_US: List Court Holidays
+description:
+  human:
+    en_US: List the days a court is closed, by court and year or date range, with a link to the court's official schedule.
+  llm: List court holidays and closure dates from Court Rules. Filter by district_id, calendar year or a date range. Each holiday has a date, a name and the official source URL. Use it before counting filing days.
+parameters:
+  - name: district_id
+    type: string
+    required: false
+    form: llm
+    label:
+      en_US: Court id
+    human_description:
+      en_US: The court id (district_id), for example edny. Leave empty to list holidays for every court. Find ids with the List Courts tool.
+    llm_description: Court identifier such as edny. Strongly recommended, because the list covers every court when it is empty.
+  - name: year
+    type: number
+    required: false
+    min: 1900
+    max: 2200
+    form: llm
+    label:
+      en_US: Year
+    human_description:
+      en_US: Calendar year, for example 2026.
+    llm_description: Calendar year as a four-digit number, for example 2026. Optional.
+  - name: date_from
+    type: string
+    required: false
+    form: llm
+    label:
+      en_US: From date
+    human_description:
+      en_US: Only holidays on or after this date, written YYYY-MM-DD.
+    llm_description: Only holidays on or after this date, in YYYY-MM-DD format. Optional.
+  - name: date_to
+    type: string
+    required: false
+    form: llm
+    label:
+      en_US: To date
+    human_description:
+      en_US: Only holidays on or before this date, written YYYY-MM-DD.
+    llm_description: Only holidays on or before this date, in YYYY-MM-DD format. Optional.
+  - name: limit
+    type: number
+    required: false
+    default: 50
+    min: 1
+    max: 500
+    form: llm
+    label:
+      en_US: Limit
+    human_description:
+      en_US: Maximum number of holidays to return, from 1 to 500. The default is 50.
+    llm_description: Maximum number of holidays to return, 1 to 500. Defaults to 50.
+extra:
+  python:
+    source: tools/list_court_holidays.py

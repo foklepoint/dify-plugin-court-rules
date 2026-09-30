@@ -1,0 +1,33 @@
+identity:
+  author: foklepoint
+  name: court_rules
+  label:
+    en_US: Court Rules
+  description:
+    en_US: Look up U.S. federal and state court rules, judge standing orders and court holidays with the Court Rules API.
+  icon: icon.svg
+  icon_dark: icon-dark.svg
+  tags:
+    - search
+    - business
+credentials_for_provider:
+  api_key:
+    type: secret-input
+    required: true
+    label:
+      en_US: Court Rules API key
+    placeholder:
+      en_US: crm_prod_...
+    help:
+      en_US: Sign in at console.courtrules.app with Google or email and copy your API key. The plugin sends it as a Bearer token to api.courtrules.app.
+    url: https://console.courtrules.app
+tools:
+  - tools/list_courts.yaml
+  - tools/list_judges.yaml
+  - tools/get_judge_rules.yaml
+  - tools/search_filing_rules.yaml
+  - tools/list_court_holidays.yaml
+  - tools/check_document.yaml
+extra:
+  python:
+    source: provider/court_rules.py

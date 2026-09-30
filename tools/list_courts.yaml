@@ -1,0 +1,63 @@
+identity:
+  name: list_courts
+  author: foklepoint
+  label:
+    en_US: List Courts
+description:
+  human:
+    en_US: Find the courts Court Rules covers and get the court id (district_id) that the other tools need.
+  llm: List U.S. federal and state courts covered by Court Rules, with each court's district_id, circuit, state, status and number of judges. Filter by words in the court name or id, and by state. Use the returned district_id (for example edny or ca-los-angeles-superior) in the other Court Rules tools.
+parameters:
+  - name: query
+    type: string
+    required: false
+    form: llm
+    label:
+      en_US: Court name or id
+    human_description:
+      en_US: Words to look for in the court name or court id, for example "eastern district new york" or "sdny". Leave empty to list courts without a name filter.
+    llm_description: Words that must all appear in the court name or district_id, for example "northern district california" or "cook". Optional.
+  - name: state
+    type: string
+    required: false
+    form: llm
+    label:
+      en_US: State
+    human_description:
+      en_US: State name to match, for example "California". Federal district courts match the state they sit in.
+    llm_description: State name or part of it, for example "california". Optional.
+  - name: status
+    type: select
+    required: false
+    default: live
+    form: llm
+    label:
+      en_US: Status
+    human_description:
+      en_US: "live courts have rules in Court Rules. coming_soon courts are mapped but have no rules yet. any returns both."
+    llm_description: Court status filter. live courts have rules, coming_soon courts do not yet, any returns both. Defaults to live.
+    options:
+      - value: live
+        label:
+          en_US: Live
+      - value: coming_soon
+        label:
+          en_US: Coming soon
+      - value: any
+        label:
+          en_US: Any
+  - name: limit
+    type: number
+    required: false
+    default: 25
+    min: 1
+    max: 200
+    form: llm
+    label:
+      en_US: Limit
+    human_description:
+      en_US: Maximum number of courts to return, from 1 to 200. The default is 25.
+    llm_description: Maximum number of courts to return, 1 to 200. Defaults to 25.
+extra:
+  python:
+    source: tools/list_courts.py

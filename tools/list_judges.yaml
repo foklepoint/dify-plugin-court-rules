@@ -1,0 +1,53 @@
+identity:
+  name: list_judges
+  author: foklepoint
+  label:
+    en_US: List Judges
+description:
+  human:
+    en_US: List the judges of one court and get the judge_slug that the rules tools need.
+  llm: List the current judges (and in some state courts departments or courtrooms) of one court in Court Rules. Returns each judge's slug, name, type, and whether Court Rules holds that judge's own rules. Use the slug as judge_slug in Get Judge Rules, Search Filing Rules and Check Document.
+parameters:
+  - name: district_id
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: Court id
+    human_description:
+      en_US: The court id (district_id), for example edny, sdny or ca-los-angeles-superior. Find it with the List Courts tool.
+    llm_description: Court identifier such as edny, sdny or ca-los-angeles-superior. Get it from List Courts.
+  - name: name
+    type: string
+    required: false
+    form: llm
+    label:
+      en_US: Judge name
+    human_description:
+      en_US: Words to look for in the judge name, for example "garaufis". Leave empty to list every judge of the court.
+    llm_description: Words that must all appear in the judge's name, for example "brown". Optional.
+  - name: only_with_rules
+    type: boolean
+    required: false
+    default: false
+    form: llm
+    label:
+      en_US: Only judges with their own rules
+    human_description:
+      en_US: When true, leave out judges for whom Court Rules holds no standing order or individual practices.
+    llm_description: When true, return only judges for whom Court Rules holds their own rules. Defaults to false.
+  - name: limit
+    type: number
+    required: false
+    default: 50
+    min: 1
+    max: 500
+    form: llm
+    label:
+      en_US: Limit
+    human_description:
+      en_US: Maximum number of judges to return, from 1 to 500. The default is 50.
+    llm_description: Maximum number of judges to return, 1 to 500. Defaults to 50.
+extra:
+  python:
+    source: tools/list_judges.py

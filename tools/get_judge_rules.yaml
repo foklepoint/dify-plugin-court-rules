@@ -1,0 +1,126 @@
+identity:
+  name: get_judge_rules
+  author: foklepoint
+  label:
+    en_US: Get Judge Rules
+description:
+  human:
+    en_US: Get the filing rules that apply before a specific judge, with the rule text and where it came from.
+  llm: Get the rules that apply to one judge in one court. For the Eastern District of New York (edny) the answer is layered as FRCP, local rules and the judge's standing order, and can be narrowed by document_scope and motion_type. For every other court it returns the court-wide rules and the judge's own rules with their source quotes and source URLs. Use List Judges first to get the judge_slug.
+parameters:
+  - name: district_id
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: Court id
+    human_description:
+      en_US: The court id (district_id), for example edny or il-cook-circuit. Find it with the List Courts tool.
+    llm_description: Court identifier such as edny or il-cook-circuit. Get it from List Courts.
+  - name: judge_slug
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: Judge slug
+    human_description:
+      en_US: The judge's slug, for example gary-r-brown. Find it with the List Judges tool.
+    llm_description: Judge slug such as gary-r-brown. Get it from List Judges.
+  - name: document_scope
+    type: select
+    required: false
+    form: llm
+    label:
+      en_US: Document type
+    human_description:
+      en_US: Only for edny. Limit the rules to the kind of document you plan to file.
+    llm_description: Only for edny. Limits rules to a kind of document. Optional.
+    options:
+      - value: brief_support
+        label:
+          en_US: Brief in support
+      - value: brief_reply
+        label:
+          en_US: Reply brief
+      - value: brief_opposition
+        label:
+          en_US: Brief in opposition
+      - value: reconsideration_support
+        label:
+          en_US: Reconsideration, support
+      - value: reconsideration_reply
+        label:
+          en_US: Reconsideration, reply
+      - value: letter
+        label:
+          en_US: Letter
+      - value: discovery_letter
+        label:
+          en_US: Discovery letter
+      - value: proposed_findings
+        label:
+          en_US: Proposed findings
+      - value: affidavit
+        label:
+          en_US: Affidavit
+      - value: settlement_statement
+        label:
+          en_US: Settlement statement
+      - value: objection_response
+        label:
+          en_US: Objection response
+      - value: rule_56_1_statement
+        label:
+          en_US: Rule 56.1 statement
+  - name: motion_type
+    type: select
+    required: false
+    form: llm
+    label:
+      en_US: Motion type
+    human_description:
+      en_US: Only for edny. Limit the rules to the kind of motion.
+    llm_description: Only for edny. Limits rules to a kind of motion. Optional.
+    options:
+      - value: Rule_12
+        label:
+          en_US: Rule 12
+      - value: Rule_56
+        label:
+          en_US: Rule 56
+      - value: Rule_50
+        label:
+          en_US: Rule 50
+      - value: Rule_59
+        label:
+          en_US: Rule 59
+      - value: Rule_60
+        label:
+          en_US: Rule 60
+      - value: Daubert
+        label:
+          en_US: Daubert
+      - value: TRO
+        label:
+          en_US: Temporary restraining order
+      - value: preliminary_injunction
+        label:
+          en_US: Preliminary injunction
+      - value: reconsideration
+        label:
+          en_US: Reconsideration
+      - value: discovery
+        label:
+          en_US: Discovery
+      - value: motion_to_amend
+        label:
+          en_US: Motion to amend
+      - value: motion_in_limine
+        label:
+          en_US: Motion in limine
+      - value: general
+        label:
+          en_US: General
+extra:
+  python:
+    source: tools/get_judge_rules.py

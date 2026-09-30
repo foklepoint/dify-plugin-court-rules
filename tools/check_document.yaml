@@ -1,0 +1,197 @@
+identity:
+  name: check_document
+  author: foklepoint
+  label:
+    en_US: Check Document Compliance
+description:
+  human:
+    en_US: Check a planned filing against a judge's rules. Send page and word counts and filing facts, and get pass, fail and action items with the rule cited. Runs for the Eastern District of New York.
+  llm: Check a planned court filing against a judge's rules with a deterministic rules engine. Give the judge, the document type, the page count, the word count and the filing facts. It returns COMPLIANT, REVIEW or NON_COMPLIANT and a list of results, each with a status, severity, category, message and rule citation. Compliance checks run only for the Eastern District of New York (edny); other courts return an error that points to Get Judge Rules. Do not guess the filing facts; ask the user.
+parameters:
+  - name: judge_slug
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: Judge slug
+    human_description:
+      en_US: The judge's slug, for example gary-r-brown. Find it with the List Judges tool.
+    llm_description: Judge slug such as gary-r-brown. Get it from List Judges.
+  - name: district_id
+    type: string
+    required: false
+    default: edny
+    form: llm
+    label:
+      en_US: Court id
+    human_description:
+      en_US: The court id. Checks run for edny (Eastern District of New York) today. The default is edny.
+    llm_description: Court identifier. Only edny is supported today. Defaults to edny.
+  - name: document_scope
+    type: select
+    required: true
+    form: llm
+    label:
+      en_US: Document type
+    human_description:
+      en_US: The kind of document being filed.
+    llm_description: The kind of document being filed.
+    options:
+      - value: brief_support
+        label:
+          en_US: Brief in support
+      - value: brief_reply
+        label:
+          en_US: Reply brief
+      - value: brief_opposition
+        label:
+          en_US: Brief in opposition
+      - value: reconsideration_support
+        label:
+          en_US: Reconsideration, support
+      - value: reconsideration_reply
+        label:
+          en_US: Reconsideration, reply
+      - value: letter
+        label:
+          en_US: Letter
+      - value: discovery_letter
+        label:
+          en_US: Discovery letter
+      - value: proposed_findings
+        label:
+          en_US: Proposed findings
+      - value: affidavit
+        label:
+          en_US: Affidavit
+      - value: settlement_statement
+        label:
+          en_US: Settlement statement
+      - value: objection_response
+        label:
+          en_US: Objection response
+      - value: rule_56_1_statement
+        label:
+          en_US: Rule 56.1 statement
+  - name: motion_type
+    type: select
+    required: false
+    form: llm
+    label:
+      en_US: Motion type
+    human_description:
+      en_US: The kind of motion the document belongs to, if any.
+    llm_description: The kind of motion the document belongs to. Optional.
+    options:
+      - value: Rule_12
+        label:
+          en_US: Rule 12
+      - value: Rule_56
+        label:
+          en_US: Rule 56
+      - value: Rule_50
+        label:
+          en_US: Rule 50
+      - value: Rule_59
+        label:
+          en_US: Rule 59
+      - value: Rule_60
+        label:
+          en_US: Rule 60
+      - value: Daubert
+        label:
+          en_US: Daubert
+      - value: TRO
+        label:
+          en_US: Temporary restraining order
+      - value: preliminary_injunction
+        label:
+          en_US: Preliminary injunction
+      - value: reconsideration
+        label:
+          en_US: Reconsideration
+      - value: discovery
+        label:
+          en_US: Discovery
+      - value: motion_to_amend
+        label:
+          en_US: Motion to amend
+      - value: motion_in_limine
+        label:
+          en_US: Motion in limine
+      - value: general
+        label:
+          en_US: General
+  - name: page_count
+    type: number
+    required: true
+    min: 0
+    form: llm
+    label:
+      en_US: Page count
+    human_description:
+      en_US: Body page count. Leave out the table of contents, table of authorities and certificates.
+    llm_description: Body page count of the document. Excludes front and back matter such as the table of contents and certificate of service.
+  - name: word_count
+    type: number
+    required: true
+    min: 0
+    form: llm
+    label:
+      en_US: Word count
+    human_description:
+      en_US: Total word count of the document.
+    llm_description: Total word count of the filed document.
+  - name: filing_role
+    type: select
+    required: false
+    default: movant
+    form: llm
+    label:
+      en_US: Filing role
+    human_description:
+      en_US: The filer's role in the motion sequence. The default is movant.
+    llm_description: The filer's role in the motion sequence. Defaults to movant.
+    options:
+      - value: movant
+        label:
+          en_US: Movant
+      - value: opponent
+        label:
+          en_US: Opponent
+      - value: reply
+        label:
+          en_US: Reply
+  - name: is_pro_se
+    type: boolean
+    required: false
+    default: false
+    form: llm
+    label:
+      en_US: Filer is self-represented
+    human_description:
+      en_US: True when the filing party has no lawyer.
+    llm_description: True when the filing party is self-represented. Ask the user; do not guess.
+  - name: pmc_completed
+    type: boolean
+    required: false
+    default: false
+    form: llm
+    label:
+      en_US: Pre-motion conference held or waived
+    human_description:
+      en_US: True when a pre-motion conference was held or waived for this motion.
+    llm_description: True when a pre-motion conference was held or waived for this motion. Ask the user; do not guess.
+  - name: opposing_party_pro_se
+    type: boolean
+    required: false
+    default: false
+    form: llm
+    label:
+      en_US: Opposing party is self-represented
+    human_description:
+      en_US: True when the opposing party has no lawyer. It matters for Rule 56 notices.
+    llm_description: True when the opposing party is self-represented. Ask the user; do not guess.
+extra:
+  python:
+    source: tools/check_document.py

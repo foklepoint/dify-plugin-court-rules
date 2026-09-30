@@ -1,0 +1,159 @@
+identity:
+  name: search_filing_rules
+  author: foklepoint
+  label:
+    en_US: Search Filing Rules
+description:
+  human:
+    en_US: Search filing rules in any covered court by topic, court, judge, rule type and case type. Every rule links to its official source.
+  llm: Search validated filing rules extracted from court rules and judge standing orders. Use it for e-filing, service, fees, deadlines, page and word limits, courtesy copies, pre-motion conferences and courtroom preferences. Each rule has a plain-English summary, the verbatim source text, a citation and the official source URL. Filter by text, district_id, judge_slug, logic_type, workflow_phase and case_type. Court-wide rules use judge_slug "court". Narrow broad searches with district_id or judge_slug.
+parameters:
+  - name: q
+    type: string
+    required: false
+    form: llm
+    label:
+      en_US: Search text
+    human_description:
+      en_US: Words to search for in rule summaries, source text and tags, for example "courtesy copy" or "rejected filing cure". Up to 200 characters.
+    llm_description: Text to search for in rule summaries, source text and tags. 1 to 200 characters. Optional.
+  - name: district_id
+    type: string
+    required: false
+    form: llm
+    label:
+      en_US: Court id
+    human_description:
+      en_US: Limit the search to one court, for example il-cook-circuit. Find ids with the List Courts tool.
+    llm_description: Court identifier such as il-cook-circuit. Strongly recommended, because a search over every court can be too broad to run.
+  - name: judge_slug
+    type: string
+    required: false
+    form: llm
+    label:
+      en_US: Judge slug
+    human_description:
+      en_US: Limit the search to one judge, calendar or courtroom. Use "court" for court-wide rules.
+    llm_description: Judge, calendar, department or courtroom slug from List Judges. Use "court" for court-wide rules. Optional.
+  - name: include_court_rules
+    type: boolean
+    required: false
+    default: true
+    form: llm
+    label:
+      en_US: Include court-wide rules
+    human_description:
+      en_US: When a judge is set, also return the court-wide rules. The default is true.
+    llm_description: When judge_slug is set, also include court-wide rules. Defaults to true.
+  - name: logic_type
+    type: select
+    required: false
+    form: llm
+    label:
+      en_US: Rule type
+    human_description:
+      en_US: Only return rules of one type.
+    llm_description: Structured rule type filter. Optional.
+    options:
+      - value: CourtesyCopyRule
+        label:
+          en_US: Courtesy copies
+      - value: PageWordLimitRule
+        label:
+          en_US: Page and word limits
+      - value: PreMotionConferenceRule
+        label:
+          en_US: Pre-motion conference
+      - value: AdjournmentRequirementRule
+        label:
+          en_US: Adjournments
+      - value: BundlingRule
+        label:
+          en_US: Bundling
+      - value: FormatConstraint
+        label:
+          en_US: Format
+      - value: DocumentRequirement
+        label:
+          en_US: Document requirements
+      - value: CommunicationRule
+        label:
+          en_US: Communication with chambers
+      - value: SealingProcedure
+        label:
+          en_US: Sealing
+      - value: ElectronicFilingRule
+        label:
+          en_US: E-filing
+      - value: FilingTimingRule
+        label:
+          en_US: Filing timing
+      - value: ServiceRule
+        label:
+          en_US: Service
+      - value: FilingFeeRule
+        label:
+          en_US: Filing fees
+      - value: JuniorLawyerIncentive
+        label:
+          en_US: Junior lawyer incentive
+  - name: workflow_phase
+    type: select
+    required: false
+    form: llm
+    label:
+      en_US: Workflow phase
+    human_description:
+      en_US: Only return rules for one phase of a case.
+    llm_description: Litigation phase filter. Optional.
+    options:
+      - value: FILING
+        label:
+          en_US: Filing
+      - value: CASE_INITIATION
+        label:
+          en_US: Case initiation
+      - value: MOTION_PRACTICE
+        label:
+          en_US: Motion practice
+      - value: TRIAL_PREP
+        label:
+          en_US: Trial preparation
+      - value: POST_JUDGMENT
+        label:
+          en_US: Post judgment
+  - name: case_type
+    type: string
+    required: false
+    form: llm
+    label:
+      en_US: Case type
+    human_description:
+      en_US: "One case type, for example civil, criminal, family, probate, small_claims, bankruptcy, habeas, prisoner, pro_se or general. General rules are included."
+    llm_description: One case type such as civil, criminal, family, probate, small_claims, bankruptcy, habeas, prisoner, social_security, pro_se, unlawful_detainer, traffic, juvenile, commercial or foreclosure. Rules with no case-type limit are included. Optional.
+  - name: limit
+    type: number
+    required: false
+    default: 10
+    min: 1
+    max: 100
+    form: llm
+    label:
+      en_US: Limit
+    human_description:
+      en_US: Maximum number of rules to return, from 1 to 100. The default is 10.
+    llm_description: Maximum number of rules to return, 1 to 100. Defaults to 10.
+  - name: offset
+    type: number
+    required: false
+    default: 0
+    min: 0
+    form: llm
+    label:
+      en_US: Offset
+    human_description:
+      en_US: Number of matching rules to skip. Use it to read the next page.
+    llm_description: Number of matching rules to skip. Use the next offset from the previous answer to read the next page. Defaults to 0.
+extra:
+  python:
+    source: tools/search_filing_rules.py

@@ -1,0 +1,39 @@
+version: 0.0.1
+type: plugin
+author: foklepoint
+name: court_rules
+label:
+  en_US: Court Rules
+description:
+  en_US: Look up U.S. federal and state court rules, judge standing orders and court holidays, and check a filing against a judge's page and word limits, with the Court Rules API.
+icon: icon.svg
+icon_dark: icon-dark.svg
+resource:
+  memory: 268435456
+  permission:
+    tool:
+      enabled: true
+network:
+  domains:
+    - api.courtrules.app
+plugins:
+  tools:
+    - provider/court_rules.yaml
+meta:
+  version: 0.0.1
+  arch:
+    - amd64
+    - arm64
+  runner:
+    language: python
+    version: "3.12"
+    entrypoint: main
+  minimum_dify_version: 1.7.1
+created_at: "2026-09-30T08:00:00.000000-07:00"
+privacy: PRIVACY.md
+repo: https://github.com/foklepoint/dify-plugin-court-rules
+contact: api@courtrules.app
+tags:
+  - search
+  - business
+verified: false
