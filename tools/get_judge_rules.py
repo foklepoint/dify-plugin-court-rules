@@ -4,7 +4,7 @@ from typing import Any
 from dify_plugin import Tool
 from dify_plugin.entities.tool import ToolInvokeMessage
 
-from court_rules_api import call_api, get_api_key, required_text_param, text_param
+from court_rules_api import call_api, required_text_param, text_param
 from court_rules_text import DIGEST_ROW_LIMIT, as_dict, as_list, extracted_rule_line, more_note, shorten
 
 SEARCH_HINT = "The JSON output has all of them. Search Filing Rules can narrow by topic."
@@ -70,13 +70,12 @@ def rules_digest(result: dict[str, Any]) -> str:
 
 class GetJudgeRulesTool(Tool):
     def _invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage, None, None]:
-        api_key = get_api_key(self.runtime.credentials)
         params = {
             "district_id": required_text_param(tool_parameters, "district_id", lowercase=True),
             "judge_slug": required_text_param(tool_parameters, "judge_slug", lowercase=True),
             "document_scope": text_param(tool_parameters, "document_scope"),
             "motion_type": text_param(tool_parameters, "motion_type"),
         }
-        result = call_api(api_key, "GET", "/api/v1/rules", params=params)
+        result = call_api(self.runtime.credentials, "GET", "/api/v1/rules", params=params)
         yield self.create_text_message(rules_digest(result))
         yield self.create_json_message(result)

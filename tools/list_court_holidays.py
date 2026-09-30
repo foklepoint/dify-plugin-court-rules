@@ -4,7 +4,7 @@ from typing import Any
 from dify_plugin import Tool
 from dify_plugin.entities.tool import ToolInvokeMessage
 
-from court_rules_api import call_api, get_api_key, int_param, optional_int_param, text_param
+from court_rules_api import call_api, int_param, optional_int_param, text_param
 from court_rules_text import as_dict, as_list
 
 DEFAULT_LIMIT = 50
@@ -26,7 +26,6 @@ def holiday_line(holiday: Any) -> str:
 
 class ListCourtHolidaysTool(Tool):
     def _invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage, None, None]:
-        api_key = get_api_key(self.runtime.credentials)
         params = {
             "district_id": text_param(tool_parameters, "district_id", lowercase=True),
             "year": optional_int_param(tool_parameters, "year"),
@@ -34,7 +33,7 @@ class ListCourtHolidaysTool(Tool):
             "date_to": text_param(tool_parameters, "date_to"),
             "limit": int_param(tool_parameters, "limit", DEFAULT_LIMIT, 1, MAX_LIMIT),
         }
-        result = call_api(api_key, "GET", "/api/v1/holidays", params=params)
+        result = call_api(self.runtime.credentials, "GET", "/api/v1/holidays", params=params)
 
         holidays = as_list(result.get("holidays"))
         if len(holidays) == 0:

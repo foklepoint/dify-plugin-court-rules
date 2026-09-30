@@ -22,6 +22,6 @@ def test_a_rejected_key_fails_validation_without_echoing_the_key(fake_api):
 
 
 def test_a_missing_key_fails_validation_without_a_request(fake_api):
-    with pytest.raises(ToolProviderCredentialValidationError, match="console.courtrules.app"):
+    with pytest.raises(ToolProviderCredentialValidationError, match="plugin credentials"):
         CourtRulesProvider().validate_credentials({})
     assert fake_api.calls == []

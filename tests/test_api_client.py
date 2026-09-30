@@ -8,7 +8,7 @@ from court_rules_api import CourtRulesError
 
 def test_call_api_uses_the_fixed_host_and_a_bearer_key(fake_api):
     fake_api.queue(FakeResponse(payload={"courts": []}))
-    result = court_rules_api.call_api("secret-key", "GET", "/api/v1/courts")
+    result = court_rules_api.call_api({"api_key": "secret-key"}, "GET", "/api/v1/courts")
     assert result == {"courts": []}
     call = fake_api.last
     assert call["method"] == "GET"
@@ -21,7 +21,7 @@ def test_call_api_uses_the_fixed_host_and_a_bearer_key(fake_api):
 def test_call_api_drops_empty_params_and_lowercases_booleans(fake_api):
     fake_api.queue(FakeResponse(payload={}))
     court_rules_api.call_api(
-        "k",
+        {"api_key": "k"},
         "GET",
         "/api/v1/extracted-rules",
         params={"q": "  ", "district_id": "edny", "year": None, "include_court_rules": True, "limit": 10},
@@ -31,7 +31,7 @@ def test_call_api_drops_empty_params_and_lowercases_booleans(fake_api):
 
 def test_call_api_sends_a_json_body_for_post(fake_api):
     fake_api.queue(FakeResponse(payload={"ok": True}))
-    court_rules_api.call_api("k", "POST", "/api/v1/check", body={"judge_slug": "a"})
+    court_rules_api.call_api({"api_key": "k"}, "POST", "/api/v1/check", body={"judge_slug": "a"})
     assert fake_api.last["method"] == "POST"
     assert fake_api.last["json"] == {"judge_slug": "a"}
 
@@ -59,22 +59,22 @@ def test_call_api_sends_a_json_body_for_post(fake_api):
 def test_error_answers_become_readable_messages(fake_api, status, payload, headers, expected):
     fake_api.queue(FakeResponse(status_code=status, payload=payload, headers=headers))
     with pytest.raises(CourtRulesError) as caught:
-        court_rules_api.call_api("secret-key", "GET", "/api/v1/courts")
+        court_rules_api.call_api({"api_key": "secret-key"}, "GET", "/api/v1/courts")
     assert expected in str(caught.value)
     assert "secret-key" not in str(caught.value)
 
 
-def test_a_bad_key_message_points_to_the_console(fake_api):
+def test_a_bad_key_message_points_to_the_plugin_credentials(fake_api):
     fake_api.queue(FakeResponse(status_code=403, payload={"error": "Invalid API key"}))
     with pytest.raises(CourtRulesError) as caught:
-        court_rules_api.call_api("k", "GET", "/api/v1/courts")
-    assert "https://console.courtrules.app" in str(caught.value)
+        court_rules_api.call_api({"api_key": "k"}, "GET", "/api/v1/courts")
+    assert "plugin credentials" in str(caught.value)
 
 
 def test_a_non_json_error_still_reports_the_status(fake_api):
     fake_api.queue(FakeResponse(status_code=502, payload=None, reason="Bad Gateway"))
     with pytest.raises(CourtRulesError) as caught:
-        court_rules_api.call_api("k", "GET", "/api/v1/courts")
+        court_rules_api.call_api({"api_key": "k"}, "GET", "/api/v1/courts")
     assert "502" in str(caught.value)
     assert "Bad Gateway" in str(caught.value)
 
@@ -82,34 +82,39 @@ def test_a_non_json_error_still_reports_the_status(fake_api):
 def test_a_non_json_success_is_an_error(fake_api):
     fake_api.queue(FakeResponse(status_code=200, payload=None))
     with pytest.raises(CourtRulesError, match="not JSON"):
-        court_rules_api.call_api("k", "GET", "/api/v1/courts")
+        court_rules_api.call_api({"api_key": "k"}, "GET", "/api/v1/courts")
 
 
 def test_a_json_list_is_an_error(fake_api):
     fake_api.queue(FakeResponse(status_code=200, payload=[1, 2]))
     with pytest.raises(CourtRulesError, match="unexpected"):
-        court_rules_api.call_api("k", "GET", "/api/v1/courts")
+        court_rules_api.call_api({"api_key": "k"}, "GET", "/api/v1/courts")
 
 
 def test_timeouts_and_connection_errors_hide_the_url(fake_api):
     fake_api.queue(requests.exceptions.Timeout("boom https://api.courtrules.app/x"))
     with pytest.raises(CourtRulesError, match="did not answer within 30 seconds") as caught:
-        court_rules_api.call_api("k", "GET", "/api/v1/courts")
+        court_rules_api.call_api({"api_key": "k"}, "GET", "/api/v1/courts")
     assert "boom" not in str(caught.value)
 
     fake_api.queue(requests.exceptions.ConnectionError("dns failure for api.courtrules.app"))
     with pytest.raises(CourtRulesError, match="ConnectionError") as caught:
-        court_rules_api.call_api("k", "GET", "/api/v1/courts")
+        court_rules_api.call_api({"api_key": "k"}, "GET", "/api/v1/courts")
     assert "dns failure" not in str(caught.value)
 
 
 def test_a_missing_key_is_reported_before_any_request(fake_api):
-    with pytest.raises(CourtRulesError, match="console.courtrules.app"):
-        court_rules_api.get_api_key({})
-    with pytest.raises(CourtRulesError):
-        court_rules_api.get_api_key({"api_key": "   "})
+    with pytest.raises(CourtRulesError, match="plugin credentials"):
+        court_rules_api.call_api({}, "GET", "/api/v1/courts")
+    with pytest.raises(CourtRulesError, match="No Court Rules API key"):
+        court_rules_api.call_api({"api_key": "   "}, "GET", "/api/v1/courts")
     assert fake_api.calls == []
-    assert court_rules_api.get_api_key({"api_key": " abc "}) == "abc"
+
+
+def test_the_key_is_trimmed(fake_api):
+    fake_api.queue(FakeResponse(payload={}))
+    court_rules_api.call_api({"api_key": " abc "}, "GET", "/api/v1/courts")
+    assert fake_api.last["headers"]["Authorization"] == "Bearer abc"
 
 
 def test_int_param_defaults_and_clamps():

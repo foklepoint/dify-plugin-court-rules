@@ -4,7 +4,7 @@ from typing import Any
 from dify_plugin import Tool
 from dify_plugin.entities.tool import ToolInvokeMessage
 
-from court_rules_api import call_api, get_api_key, int_param, text_param
+from court_rules_api import call_api, int_param, text_param
 from court_rules_text import as_dict, as_list, court_line
 
 DEFAULT_LIMIT = 25
@@ -26,13 +26,12 @@ def court_matches(court: Any, words: list[str], state: str, status: str) -> bool
 
 class ListCourtsTool(Tool):
     def _invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage, None, None]:
-        api_key = get_api_key(self.runtime.credentials)
         words = text_param(tool_parameters, "query", lowercase=True).split()
         state = text_param(tool_parameters, "state", lowercase=True)
         status = text_param(tool_parameters, "status", lowercase=True) or "live"
         limit = int_param(tool_parameters, "limit", DEFAULT_LIMIT, 1, MAX_LIMIT)
 
-        payload = call_api(api_key, "GET", "/api/v1/courts")
+        payload = call_api(self.runtime.credentials, "GET", "/api/v1/courts")
         meta = as_dict(payload.get("meta"))
         matched = []
         for court in as_list(payload.get("courts")):

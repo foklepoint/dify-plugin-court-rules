@@ -8,7 +8,6 @@ from court_rules_api import (
     CourtRulesError,
     bool_param,
     call_api,
-    get_api_key,
     required_int_param,
     required_text_param,
     text_param,
@@ -73,7 +72,6 @@ def check_digest(result: dict[str, Any]) -> str:
 
 class CheckDocumentTool(Tool):
     def _invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage, None, None]:
-        api_key = get_api_key(self.runtime.credentials)
         filing_role = text_param(tool_parameters, "filing_role", lowercase=True) or "movant"
         if filing_role not in FILING_ROLES:
             raise CourtRulesError("The filing_role parameter must be movant, opponent or reply.")
@@ -94,6 +92,6 @@ class CheckDocumentTool(Tool):
         if motion_type != "":
             body["motion_type"] = motion_type
 
-        result = call_api(api_key, "POST", "/api/v1/check", body=body)
+        result = call_api(self.runtime.credentials, "POST", "/api/v1/check", body=body)
         yield self.create_text_message(check_digest(result))
         yield self.create_json_message(result)

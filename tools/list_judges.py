@@ -4,7 +4,7 @@ from typing import Any
 from dify_plugin import Tool
 from dify_plugin.entities.tool import ToolInvokeMessage
 
-from court_rules_api import bool_param, call_api, get_api_key, int_param, required_text_param, text_param
+from court_rules_api import bool_param, call_api, int_param, required_text_param, text_param
 from court_rules_text import as_dict, as_list
 
 DEFAULT_LIMIT = 50
@@ -32,13 +32,12 @@ def judge_line(judge: Any) -> str:
 
 class ListJudgesTool(Tool):
     def _invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage, None, None]:
-        api_key = get_api_key(self.runtime.credentials)
         district_id = required_text_param(tool_parameters, "district_id", lowercase=True)
         words = text_param(tool_parameters, "name", lowercase=True).split()
         only_with_rules = bool_param(tool_parameters, "only_with_rules", False)
         limit = int_param(tool_parameters, "limit", DEFAULT_LIMIT, 1, MAX_LIMIT)
 
-        payload = call_api(api_key, "GET", "/api/v1/judges", params={"district_id": district_id})
+        payload = call_api(self.runtime.credentials, "GET", "/api/v1/judges", params={"district_id": district_id})
         meta = as_dict(payload.get("meta"))
         matched = []
         for judge in as_list(payload.get("judges")):

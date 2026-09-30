@@ -10,19 +10,12 @@ import requests
 API_BASE_URL = "https://api.courtrules.app"
 REQUEST_TIMEOUT_SECONDS = 30
 USER_AGENT = "dify-plugin-court-rules/0.0.1"
-KEY_HELP = "Create an API key at https://console.courtrules.app and add it in the plugin credentials."
+KEY_HELP = "Check the API key in the plugin credentials."
 MAX_ERROR_LENGTH = 600
 
 
 class CourtRulesError(Exception):
     """A Court Rules call failed. The message is safe to show to the user."""
-
-
-def get_api_key(credentials: dict[str, Any]) -> str:
-    api_key = str(credentials.get("api_key") or "").strip()
-    if api_key == "":
-        raise CourtRulesError("No Court Rules API key is set. " + KEY_HELP)
-    return api_key
 
 
 def clean_params(params: dict[str, Any] | None) -> dict[str, str]:
@@ -80,13 +73,16 @@ def describe_error(response: requests.Response) -> str:
 
 
 def call_api(
-    api_key: str,
+    credentials: dict[str, Any],
     method: str,
     path: str,
     params: dict[str, Any] | None = None,
     body: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Call one Court Rules endpoint and return the decoded JSON object."""
+    """Call one Court Rules endpoint with the plugin credentials and return the decoded JSON object."""
+    api_key = str(credentials.get("api_key") or "").strip()
+    if api_key == "":
+        raise CourtRulesError("No Court Rules API key is set. Add one in the plugin credentials.")
     headers = {
         "Authorization": "Bearer " + api_key,
         "Accept": "application/json",
